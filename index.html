@@ -58,30 +58,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             transition: all 0.3s ease;
             width: max-content;
             max-width: 95vw;
-        }
-
-        .slider-tooltip {
-            background: var(--nav-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            padding: 10px 20px;
-            display: none; 
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 300px;
-        }
-
-        .slider-tooltip input[type="range"] {
-            flex-grow: 1;
-            accent-color: var(--active-color);
         }
 
         .toolbar {
@@ -95,6 +75,17 @@
             flex-direction: column;
             gap: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .sub-toolbar {
+            display: none; 
+            padding: 8px 15px;
+            animation: slideUp 0.2s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .toolbar-minimized {
@@ -118,8 +109,7 @@
             bottom: 20px;
             transform: none;
         }
-        .toolbar-container.squeezed .toolbar, 
-        .toolbar-container.squeezed .slider-tooltip {
+        .toolbar-container.squeezed .toolbar {
             display: none !important;
         }
         .toolbar-container.squeezed .toolbar-minimized {
@@ -130,7 +120,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap; 
         }
 
@@ -138,11 +128,11 @@
             background: transparent;
             border: none;
             color: var(--text-color);
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -156,8 +146,8 @@
         }
 
         .color-btn {
-            width: 30px;
-            height: 30px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             border: 2px solid transparent;
             cursor: pointer;
@@ -166,7 +156,7 @@
 
         .color-btn.active {
             border-color: #ffffff;
-            transform: scale(1.1);
+            transform: scale(1.2);
         }
 
         .hex-input-wrapper {
@@ -182,17 +172,22 @@
             background: transparent;
             border: none;
             color: var(--text-color);
-            width: 60px;
+            width: 55px;
             outline: none;
             font-family: monospace;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .divider {
             width: 1px;
             height: 24px;
             background: var(--border-color);
-            margin: 0 5px;
+            margin: 0 3px;
+        }
+
+        input[type="range"] {
+            accent-color: var(--active-color);
+            width: 80px;
         }
     </style>
 </head>
@@ -203,9 +198,25 @@
     </div>
 
     <div class="toolbar-container" id="toolbarContainer">
-        <div class="slider-tooltip" id="sliderTooltip">
-            <span id="sizeLabel" style="min-width: 45px; font-size: 14px;">5px</span>
-            <input type="range" id="sizeSlider" min="1" max="100" value="5">
+        
+        <div class="toolbar sub-toolbar" id="eraserSliderMenu">
+            <div class="row">
+                <span id="eraserLabel" style="min-width: 40px; font-size: 14px;">25px</span>
+                <input type="range" id="eraserSlider" min="1" max="100" value="25">
+            </div>
+        </div>
+
+        <div class="toolbar sub-toolbar" id="penSubMenu">
+            <div class="row">
+                <button id="tool-ball" class="active" title="Ball Pen (Solid)"><i class="fa-solid fa-pen"></i></button>
+                <button id="tool-ink" title="Ink Pen (Smooth)"><i class="fa-solid fa-pen-nib"></i></button>
+                <button id="tool-pencil" title="Pencil (Soft)"><i class="fa-solid fa-pencil"></i></button>
+                <button id="tool-brush" title="Paint Brush (Thick)"><i class="fa-solid fa-paintbrush"></i></button>
+                <button id="tool-highlighter" title="Highlighter"><i class="fa-solid fa-marker"></i></button>
+                <div class="divider"></div>
+                <span id="penLabel" style="min-width: 35px; font-size: 14px;">5px</span>
+                <input type="range" id="penSlider" min="1" max="100" value="5">
+            </div>
         </div>
 
         <div class="toolbar-minimized" id="expandBtn">
@@ -219,7 +230,6 @@
                 <div class="color-btn" style="background-color: #007aff;" data-color="#007aff"></div>
                 <div class="color-btn" style="background-color: #34c759;" data-color="#34c759"></div>
                 <div class="color-btn" style="background-color: #ffcc00;" data-color="#ffcc00"></div>
-                
                 <div class="hex-input-wrapper">
                     <span>#</span>
                     <input type="text" id="hexInput" value="ffffff" maxlength="6">
@@ -227,28 +237,27 @@
             </div>
 
             <div class="row">
-                <button id="tool-select" title="Select & Move"><i class="fa-solid fa-arrow-pointer"></i></button>
-                <button id="tool-hand" title="1-Finger Pan"><i class="fa-regular fa-hand"></i></button>
+                <button id="tool-select" title="Select Tool"><i class="fa-solid fa-arrow-pointer"></i></button>
+                <button id="tool-hand" title="Pan Canvas"><i class="fa-regular fa-hand"></i></button>
                 <div class="divider"></div>
-                <button id="tool-pen" class="active" title="Pen (Tap again for size)"><i class="fa-solid fa-pen"></i></button>
-                <button id="tool-eraser" title="Eraser (Tap again for size)"><i class="fa-solid fa-eraser"></i></button>
+                
+                <button id="tool-master-pen" class="active" title="Pen Options"><i class="fa-solid fa-pen"></i></button>
+                <button id="tool-eraser" title="Eraser"><i class="fa-solid fa-eraser"></i></button>
                 <button id="tool-rect" title="Square"><i class="fa-regular fa-square"></i></button>
                 <button id="tool-circle" title="Circle"><i class="fa-regular fa-circle"></i></button>
                 <button id="tool-line" title="Line"><i class="fa-solid fa-minus"></i></button>
                 
                 <div class="divider"></div>
-                
-                <button id="zoomOutBtn" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
-                <button id="zoomInBtn" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
-                
+                <button id="fullscreenBtn" title="Full Screen"><i class="fa-solid fa-expand"></i></button>
+                <button id="gridBtn" title="Toggle Grid"><i class="fa-solid fa-border-none"></i></button>
+                <button id="recenterBtn" title="Fit to Screen"><i class="fa-solid fa-crosshairs"></i></button>
+                <button id="zoomLockBtn" title="Lock Zoom"><i class="fa-solid fa-lock-open"></i></button>
                 <div class="divider"></div>
-
+                
                 <button id="undoBtn" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
                 <button id="redoBtn" title="Redo"><i class="fa-solid fa-rotate-right"></i></button>
-                
+                <button id="clearBtn" title="Clear Canvas" style="color: #ff3b30;"><i class="fa-solid fa-trash-can"></i></button>
                 <div class="divider"></div>
-
-                <button id="fullscreenBtn" title="Full Screen"><i class="fa-solid fa-expand"></i></button>
                 <button id="squeezeBtn" title="Squeeze Menu"><i class="fa-solid fa-compress"></i></button>
             </div>
         </div>
@@ -257,40 +266,50 @@
     <script>
         const wrapper = document.getElementById('canvasWrapper');
         const canvas = document.getElementById('drawingCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: false }); 
         
-        // Multi-touch & Vector Management
         const pointers = new Map();
         let gestureActive = false;
         let prevDiff = -1;
         let prevMid = {x: 0, y: 0};
 
-        // Infinite Canvas Engine History
         let strokes = []; 
         let currentStroke = null; 
         let redoStack = [];
 
-        // State variables
         let isDrawing = false;
         let isPanning = false;
         let lastClientPos = {x: 0, y: 0};
+        let isZoomLocked = false;
+        let showGrid = false;
 
-        // Selection Engine State
         let selectedIndex = -1;
-        let transformAction = null; // 'move', 'resize-tl', 'resize-tr', 'resize-bl', 'resize-br'
+        let transformAction = null; 
         let transformOrigin = {x: 0, y: 0};
         let startBoundingBox = null;
 
-        // Tools
-        let currentTool = 'pen';
+        let currentTool = 'ball';
         let brushColor = '#ffffff';
         let penSize = 5;
         let eraserSize = 25;
 
-        // Internal Camera Viewport
         let zoomLevel = 1;
         let panX = 0;
         let panY = 0;
+
+        let snapTimer = null;
+        const SNAP_DELAY = 600;
+
+        function saveToLocal() {
+            try { localStorage.setItem('pwaDrawingV5', JSON.stringify(strokes)); } catch (e) { }
+        }
+
+        function loadFromLocal() {
+            const savedData = localStorage.getItem('pwaDrawingV5');
+            if (savedData) {
+                try { strokes = JSON.parse(savedData); } catch (e) { strokes = []; }
+            }
+        }
 
         function initCanvas() {
             const ratio = window.devicePixelRatio || 1;
@@ -302,9 +321,9 @@
         }
 
         window.addEventListener('resize', initCanvas);
+        loadFromLocal(); 
         initCanvas();
 
-        // Object Hit Detection & Bounding Boxes
         function getBoundingBox(stroke) {
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
             stroke.points.forEach(p => {
@@ -313,50 +332,113 @@
                 if(p.x > maxX) maxX = p.x;
                 if(p.y > maxY) maxY = p.y;
             });
-            const pad = (stroke.size / 2) + 10; // Hitbox padding
+            const pad = (stroke.size / 2) + 15; 
             return { x: minX - pad, y: minY - pad, w: (maxX - minX) + pad*2, h: (maxY - minY) + pad*2 };
         }
 
         function checkHit(worldPos) {
-            // Check backwards to select the top-most shape
             for (let i = strokes.length - 1; i >= 0; i--) {
                 const box = getBoundingBox(strokes[i]);
                 if (worldPos.x >= box.x && worldPos.x <= box.x + box.w && 
-                    worldPos.y >= box.y && worldPos.y <= box.y + box.h) {
-                    return i;
-                }
+                    worldPos.y >= box.y && worldPos.y <= box.y + box.h) return i;
             }
             return -1;
         }
 
         function getHandleHit(worldPos, box) {
-            const hs = 15 / zoomLevel; // Handle size scales with zoom
+            const hs = 15 / zoomLevel; 
             const handles = {
                 'resize-tl': {x: box.x, y: box.y},
                 'resize-tr': {x: box.x + box.w, y: box.y},
                 'resize-bl': {x: box.x, y: box.y + box.h},
                 'resize-br': {x: box.x + box.w, y: box.y + box.h}
             };
-
             for (const [key, pos] of Object.entries(handles)) {
                 if (worldPos.x >= pos.x - hs && worldPos.x <= pos.x + hs &&
-                    worldPos.y >= pos.y - hs && worldPos.y <= pos.y + hs) {
-                    return key;
-                }
+                    worldPos.y >= pos.y - hs && worldPos.y <= pos.y + hs) return key;
             }
             return null;
         }
 
+        function drawGridLayer() {
+            if (!showGrid) return;
+            const size = 50 * zoomLevel;
+            const ratio = window.devicePixelRatio || 1;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            
+            const offsetX = (panX * ratio) % size;
+            const offsetY = (panY * ratio) % size;
+            
+            for(let x = offsetX; x < canvas.width; x += size) {
+                for(let y = offsetY; y < canvas.height; y += size) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 1.5 * ratio, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
+        }
 
-        // Master Rendering Engine
+        // --- 100% SMOOTH RENDERING ENGINE ---
+        function renderFreehand(stroke) {
+            const pts = stroke.points;
+            if (pts.length === 0) return;
+            
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            let baseSize = stroke.size;
+            ctx.globalAlpha = 1.0;
+
+            if (stroke.tool === 'highlighter') {
+                ctx.globalAlpha = 0.35;
+                baseSize = stroke.size * 3;
+            } else if (stroke.tool === 'pencil') {
+                ctx.globalAlpha = 0.5;
+                baseSize = stroke.size * 0.5;
+            } else if (stroke.tool === 'brush') {
+                ctx.globalAlpha = 0.9;
+                baseSize = stroke.size * 1.5;
+            }
+
+            ctx.lineWidth = Math.max(0.5, baseSize);
+            ctx.strokeStyle = stroke.tool === 'eraser' ? '#000000' : stroke.color;
+
+            // BUG FIX: Single Tap Dot
+            if (pts.length === 1) {
+                ctx.beginPath();
+                ctx.fillStyle = ctx.strokeStyle;
+                ctx.arc(pts[0].x, pts[0].y, ctx.lineWidth / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+                return;
+            }
+
+            // BUG FIX: Continuous Unified Path (No Caterpillar/Dots)
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            
+            for(let i = 1; i < pts.length - 1; i++) {
+                const midX = (pts[i].x + pts[i+1].x) / 2;
+                const midY = (pts[i].y + pts[i+1].y) / 2;
+                ctx.quadraticCurveTo(pts[i].x, pts[i].y, midX, midY);
+            }
+            
+            ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y); 
+            ctx.stroke();
+
+            ctx.globalAlpha = 1.0; // Reset
+        }
+
         function redraw() {
             const ratio = window.devicePixelRatio || 1;
             
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.fillStyle = '#000000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.scale(ratio, ratio);
             
+            drawGridLayer(); 
+
+            ctx.scale(ratio, ratio);
             ctx.translate(panX, panY);
             ctx.scale(zoomLevel, zoomLevel);
 
@@ -365,29 +447,18 @@
             allStrokes.forEach((stroke, index) => {
                 if (stroke.points.length === 0) return;
 
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                ctx.lineWidth = stroke.size;
-                ctx.strokeStyle = stroke.tool === 'eraser' ? '#000000' : stroke.color;
-
-                ctx.beginPath();
-                
-                if (stroke.tool === 'pen' || stroke.tool === 'eraser') {
-                    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-                    let lastPos = stroke.points[0];
-                    for(let i = 1; i < stroke.points.length; i++) {
-                        const pos = stroke.points[i];
-                        const midX = lastPos.x + (pos.x - lastPos.x)/2;
-                        const midY = lastPos.y + (pos.y - lastPos.y)/2;
-                        ctx.quadraticCurveTo(lastPos.x, lastPos.y, midX, midY);
-                        lastPos = pos;
-                    }
-                    ctx.lineTo(lastPos.x, lastPos.y); 
-                    ctx.stroke();
+                if (['ball', 'ink', 'pencil', 'brush', 'highlighter', 'eraser'].includes(stroke.tool)) {
+                    renderFreehand(stroke);
                 } else {
                     if(stroke.points.length < 2) return;
+                    ctx.lineWidth = stroke.size;
+                    ctx.strokeStyle = stroke.color;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+
                     const start = stroke.points[0];
                     const end = stroke.points[stroke.points.length - 1]; 
+                    ctx.beginPath();
                     if (stroke.tool === 'rect') {
                         ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
                     } else if (stroke.tool === 'circle') {
@@ -400,7 +471,6 @@
                     ctx.stroke();
                 }
 
-                // Draw Selection Box
                 if (index === selectedIndex && currentTool === 'select') {
                     const box = getBoundingBox(stroke);
                     ctx.lineWidth = 2 / zoomLevel;
@@ -409,13 +479,12 @@
                     ctx.strokeRect(box.x, box.y, box.w, box.h);
                     ctx.setLineDash([]);
 
-                    // Draw Handles
                     const hs = 10 / zoomLevel;
                     ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(box.x - hs/2, box.y - hs/2, hs, hs); // TL
-                    ctx.fillRect(box.x + box.w - hs/2, box.y - hs/2, hs, hs); // TR
-                    ctx.fillRect(box.x - hs/2, box.y + box.h - hs/2, hs, hs); // BL
-                    ctx.fillRect(box.x + box.w - hs/2, box.y + box.h - hs/2, hs, hs); // BR
+                    ctx.fillRect(box.x - hs/2, box.y - hs/2, hs, hs); 
+                    ctx.fillRect(box.x + box.w - hs/2, box.y - hs/2, hs, hs); 
+                    ctx.fillRect(box.x - hs/2, box.y + box.h - hs/2, hs, hs); 
+                    ctx.fillRect(box.x + box.w - hs/2, box.y + box.h - hs/2, hs, hs); 
                 }
             });
         }
@@ -427,8 +496,6 @@
             };
         }
 
-        // --- INTERACTION LOGIC ---
-
         function startAction(e) {
             if (e.target.closest('.toolbar-container')) return; 
             pointers.set(e.pointerId, e);
@@ -437,6 +504,7 @@
                 gestureActive = true;
                 currentStroke = null;
                 transformAction = null;
+                clearTimeout(snapTimer); 
                 const pts = Array.from(pointers.values());
                 prevDiff = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
                 prevMid = { x: (pts[0].clientX + pts[1].clientX)/2, y: (pts[0].clientY + pts[1].clientY)/2 };
@@ -452,18 +520,13 @@
                     if (selectedIndex !== -1) {
                         const box = getBoundingBox(strokes[selectedIndex]);
                         const handleHit = getHandleHit(pos, box);
-                        
                         if (handleHit) {
                             transformAction = handleHit;
                             startBoundingBox = { ...box };
-                            
-                            // Define anchor point opposite to the handle being pulled
                             if (handleHit === 'resize-tl') transformOrigin = {x: box.x + box.w, y: box.y + box.h};
                             if (handleHit === 'resize-tr') transformOrigin = {x: box.x, y: box.y + box.h};
                             if (handleHit === 'resize-bl') transformOrigin = {x: box.x + box.w, y: box.y};
                             if (handleHit === 'resize-br') transformOrigin = {x: box.x, y: box.y};
-                            
-                            // Save original points state for scaling reference
                             strokes[selectedIndex].originalPoints = JSON.parse(JSON.stringify(strokes[selectedIndex].points));
                             return;
                         } else if (pos.x >= box.x && pos.x <= box.x + box.w && pos.y >= box.y && pos.y <= box.y + box.h) {
@@ -471,8 +534,6 @@
                             return;
                         }
                     }
-                    
-                    // If clicked outside active selection box, try to select a new object
                     selectedIndex = checkHit(pos);
                     transformAction = selectedIndex !== -1 ? 'move' : null;
                     redraw();
@@ -486,16 +547,29 @@
                 }
                 
                 isDrawing = true;
-                selectedIndex = -1; // Deselect when drawing
+                selectedIndex = -1; 
                 currentStroke = {
                     tool: currentTool,
                     color: brushColor,
                     size: currentTool === 'eraser' ? eraserSize : penSize,
-                    points: [pos, pos] 
+                    points: [pos] 
                 };
                 
-                document.getElementById('sliderTooltip').style.display = 'none';
-                redraw();
+                resetSnapTimer();
+                redraw(); // This will immediately draw the single tap dot
+            }
+        }
+
+        function resetSnapTimer() {
+            clearTimeout(snapTimer);
+            if (['ball', 'ink', 'pencil', 'brush', 'highlighter'].includes(currentTool)) {
+                snapTimer = setTimeout(() => {
+                    if (isDrawing && currentStroke && currentStroke.points.length > 5) {
+                        currentStroke.tool = 'line';
+                        currentStroke.points = [currentStroke.points[0], currentStroke.points[currentStroke.points.length-1]];
+                        redraw();
+                    }
+                }, SNAP_DELAY);
             }
         }
 
@@ -503,26 +577,23 @@
             if (!pointers.has(e.pointerId)) return;
             pointers.set(e.pointerId, e); 
 
-            // 2-Finger Pinch & Pan
             if (pointers.size === 2) {
                 const pts = Array.from(pointers.values());
                 const curDiff = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
                 const curMid = { x: (pts[0].clientX + pts[1].clientX)/2, y: (pts[0].clientY + pts[1].clientY)/2 };
 
                 if (prevDiff > 0) {
-                    const scaleChange = curDiff / prevDiff;
-                    const newZoom = Math.max(0.05, zoomLevel * scaleChange); 
-
-                    const midWorldX = (curMid.x - panX) / zoomLevel;
-                    const midWorldY = (curMid.y - panY) / zoomLevel;
-
-                    zoomLevel = newZoom;
-
-                    panX = curMid.x - (midWorldX * zoomLevel);
-                    panY = curMid.y - (midWorldY * zoomLevel);
+                    if (!isZoomLocked) {
+                        const scaleChange = curDiff / prevDiff;
+                        const newZoom = Math.max(0.05, zoomLevel * scaleChange); 
+                        const midWorldX = (curMid.x - panX) / zoomLevel;
+                        const midWorldY = (curMid.y - panY) / zoomLevel;
+                        zoomLevel = newZoom;
+                        panX = curMid.x - (midWorldX * zoomLevel);
+                        panY = curMid.y - (midWorldY * zoomLevel);
+                    }
                     panX += (curMid.x - prevMid.x);
                     panY += (curMid.y - prevMid.y);
-
                     redraw();
                 }
                 prevDiff = curDiff;
@@ -530,10 +601,8 @@
                 return;
             }
 
-            // 1-Finger
             if (pointers.size === 1 && !gestureActive) {
                 
-                // Select Tool Transformations
                 if (currentTool === 'select' && transformAction && selectedIndex !== -1) {
                     const pos = getWorldPos(e);
                     const stroke = strokes[selectedIndex];
@@ -541,14 +610,9 @@
                     if (transformAction === 'move') {
                         const dx = (e.clientX - lastClientPos.x) / zoomLevel;
                         const dy = (e.clientY - lastClientPos.y) / zoomLevel;
-                        stroke.points.forEach(p => {
-                            p.x += dx;
-                            p.y += dy;
-                        });
+                        stroke.points.forEach(p => { p.x += dx; p.y += dy; });
                     } else if (transformAction.startsWith('resize')) {
-                        // Calculate scale factor based on handle movement
                         let scaleX = 1, scaleY = 1;
-                        
                         if (transformAction === 'resize-br') {
                             scaleX = (pos.x - transformOrigin.x) / startBoundingBox.w;
                             scaleY = (pos.y - transformOrigin.y) / startBoundingBox.h;
@@ -563,17 +627,14 @@
                             scaleY = (pos.y - transformOrigin.y) / startBoundingBox.h;
                         }
 
-                        // Prevent flipping or collapsing to 0
                         if(Math.abs(scaleX) < 0.1) scaleX = scaleX < 0 ? -0.1 : 0.1;
                         if(Math.abs(scaleY) < 0.1) scaleY = scaleY < 0 ? -0.1 : 0.1;
 
-                        // Apply scale relative to anchor point
                         stroke.points = stroke.originalPoints.map(p => ({
                             x: transformOrigin.x + (p.x - transformOrigin.x) * scaleX,
                             y: transformOrigin.y + (p.y - transformOrigin.y) * scaleY
                         }));
                     }
-
                     lastClientPos = { x: e.clientX, y: e.clientY };
                     redraw();
                     return;
@@ -588,7 +649,11 @@
                 }
 
                 if (isDrawing && currentStroke) {
+                    const distMoved = Math.hypot(e.clientX - lastClientPos.x, e.clientY - lastClientPos.y);
+                    if (distMoved > 3) resetSnapTimer();
+
                     currentStroke.points.push(getWorldPos(e));
+                    lastClientPos = { x: e.clientX, y: e.clientY };
                     redraw();
                 }
             }
@@ -597,16 +662,17 @@
         function endAction(e) {
             pointers.delete(e.pointerId);
             if (pointers.size < 2) prevDiff = -1;
+            clearTimeout(snapTimer); 
 
             if (pointers.size === 0) {
                 gestureActive = false;
                 
                 if (transformAction) {
-                    // Clean up original points copy after resize
                     if (selectedIndex !== -1 && strokes[selectedIndex].originalPoints) {
                         delete strokes[selectedIndex].originalPoints;
                     }
                     transformAction = null;
+                    saveToLocal();
                 }
 
                 if (isPanning) {
@@ -617,7 +683,7 @@
                 if (isDrawing && currentStroke) {
                     isDrawing = false;
                     
-                    if (currentStroke.tool !== 'pen' && currentStroke.tool !== 'eraser') {
+                    if (!['ball', 'ink', 'pencil', 'brush', 'highlighter', 'eraser'].includes(currentStroke.tool)) {
                         currentStroke.points = [currentStroke.points[0], currentStroke.points[currentStroke.points.length-1]];
                     }
                     
@@ -625,6 +691,7 @@
                     redoStack = []; 
                     currentStroke = null;
                     redraw();
+                    saveToLocal(); 
                 }
             }
         }
@@ -634,79 +701,125 @@
         window.addEventListener('pointerup', endAction);
         window.addEventListener('pointercancel', endAction);
 
-        // --- UNDO & REDO ---
+        // --- UTILITIES ---
         document.getElementById('undoBtn').addEventListener('click', () => {
-            if (strokes.length > 0) {
-                redoStack.push(strokes.pop());
-                selectedIndex = -1; // Clear selection on undo
-                redraw();
-            }
+            if (strokes.length > 0) { redoStack.push(strokes.pop()); selectedIndex = -1; redraw(); saveToLocal(); }
         });
 
         document.getElementById('redoBtn').addEventListener('click', () => {
-            if (redoStack.length > 0) {
-                strokes.push(redoStack.pop());
+            if (redoStack.length > 0) { strokes.push(redoStack.pop()); redraw(); saveToLocal(); }
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (confirm("Wipe canvas?")) { strokes = []; redoStack = []; selectedIndex = -1; redraw(); saveToLocal(); }
+        });
+
+        document.getElementById('gridBtn').addEventListener('click', (e) => {
+            showGrid = !showGrid;
+            e.currentTarget.style.color = showGrid ? 'var(--active-color)' : 'var(--text-color)';
+            redraw();
+        });
+
+        document.getElementById('zoomLockBtn').addEventListener('click', (e) => {
+            isZoomLocked = !isZoomLocked;
+            const icon = e.currentTarget.querySelector('i');
+            if (isZoomLocked) {
+                icon.className = 'fa-solid fa-lock';
+                e.currentTarget.style.color = '#ff3b30'; 
+            } else {
+                icon.className = 'fa-solid fa-lock-open';
+                e.currentTarget.style.color = 'var(--text-color)';
+            }
+        });
+
+        document.getElementById('recenterBtn').addEventListener('click', () => {
+            if (strokes.length === 0) {
+                panX = 0; panY = 0; zoomLevel = 1;
+            } else {
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                strokes.forEach(s => s.points.forEach(p => {
+                    if(p.x < minX) minX = p.x; if(p.y < minY) minY = p.y;
+                    if(p.x > maxX) maxX = p.x; if(p.y > maxY) maxY = p.y;
+                }));
+                const w = maxX - minX; const h = maxY - minY;
+                const scaleX = (window.innerWidth - 50) / w;
+                const scaleY = (window.innerHeight - 50) / h;
+                zoomLevel = Math.max(0.1, Math.min(scaleX, scaleY, 2)); 
+                panX = (window.innerWidth / 2) - ((minX + w/2) * zoomLevel);
+                panY = (window.innerHeight / 2) - ((minY + h/2) * zoomLevel);
+            }
+            redraw();
+        });
+
+        document.getElementById('fullscreenBtn').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error("Error attempting to enable fullscreen:", err.message);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // --- SUB-MENU & TOOL LOGIC ---
+        const masterPenBtn = document.getElementById('tool-master-pen');
+        const penSubMenu = document.getElementById('penSubMenu');
+        const eraserSliderMenu = document.getElementById('eraserSliderMenu');
+
+        masterPenBtn.addEventListener('click', () => {
+            eraserSliderMenu.style.display = 'none';
+            if (['ball', 'ink', 'pencil', 'brush', 'highlighter'].includes(currentTool)) {
+                penSubMenu.style.display = penSubMenu.style.display === 'flex' ? 'none' : 'flex';
+            } else {
+                document.querySelectorAll('#mainToolbar button.active').forEach(b => b.classList.remove('active'));
+                masterPenBtn.classList.add('active');
+                
+                const activeSubPen = document.querySelector('#penSubMenu button.active');
+                currentTool = activeSubPen.id.replace('tool-', '');
+                
+                penSubMenu.style.display = 'flex';
+                selectedIndex = -1; 
                 redraw();
             }
         });
 
-        // --- UI LOGIC ---
-        const toolBtns = document.querySelectorAll('.toolbar .row:nth-child(2) button[id^="tool-"]');
-        const sliderTooltip = document.getElementById('sliderTooltip');
-        const sizeSlider = document.getElementById('sizeSlider');
-        const sizeLabel = document.getElementById('sizeLabel');
-
-        toolBtns.forEach(btn => {
+        const otherTools = document.querySelectorAll('.toolbar button[id^="tool-"]:not(#tool-master-pen)');
+        otherTools.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const clickedTool = e.currentTarget.id.replace('tool-', '');
                 
-                if (currentTool === clickedTool && (clickedTool === 'pen' || clickedTool === 'eraser')) {
-                    sliderTooltip.style.display = sliderTooltip.style.display === 'flex' ? 'none' : 'flex';
+                if (['ball', 'ink', 'pencil', 'brush', 'highlighter'].includes(clickedTool)) {
+                    document.querySelectorAll('#penSubMenu button.active').forEach(b => b.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    currentTool = clickedTool;
+                    return; 
+                }
+
+                penSubMenu.style.display = 'none';
+                document.querySelectorAll('#mainToolbar button.active').forEach(b => b.classList.remove('active'));
+                
+                if (clickedTool === 'eraser') {
+                    e.currentTarget.classList.add('active');
+                    eraserSliderMenu.style.display = eraserSliderMenu.style.display === 'flex' ? 'none' : 'flex';
                 } else {
-                    sliderTooltip.style.display = 'none';
+                    eraserSliderMenu.style.display = 'none';
+                    e.currentTarget.classList.add('active');
                 }
 
-                document.querySelector('.toolbar .row:nth-child(2) .active')?.classList.remove('active');
-                e.currentTarget.classList.add('active');
                 currentTool = clickedTool;
-
-                if (currentTool !== 'select') {
-                    selectedIndex = -1; // Deselect when switching tools
-                    redraw();
-                }
-
-                if (currentTool === 'pen') {
-                    sizeSlider.value = penSize;
-                    sizeLabel.textContent = penSize + 'px';
-                } else if (currentTool === 'eraser') {
-                    sizeSlider.value = eraserSize;
-                    sizeLabel.textContent = eraserSize + 'px';
-                }
+                if (currentTool !== 'select') { selectedIndex = -1; redraw(); }
             });
         });
 
-        sizeSlider.addEventListener('input', (e) => {
-            const val = e.target.value;
-            sizeLabel.textContent = val + 'px';
-            if (currentTool === 'pen') penSize = parseInt(val);
-            if (currentTool === 'eraser') eraserSize = parseInt(val);
+        document.getElementById('penSlider').addEventListener('input', (e) => {
+            penSize = parseInt(e.target.value);
+            document.getElementById('penLabel').textContent = penSize + 'px';
         });
 
-        function adjustZoom(amt) {
-            const midX = window.innerWidth / 2;
-            const midY = window.innerHeight / 2;
-            const worldX = (midX - panX) / zoomLevel;
-            const worldY = (midY - panY) / zoomLevel;
-            
-            zoomLevel = Math.max(0.1, zoomLevel + amt); 
-            
-            panX = midX - (worldX * zoomLevel);
-            panY = midY - (worldY * zoomLevel);
-            redraw();
-        }
-
-        document.getElementById('zoomInBtn').addEventListener('click', () => adjustZoom(0.2));
-        document.getElementById('zoomOutBtn').addEventListener('click', () => adjustZoom(-0.2));
+        document.getElementById('eraserSlider').addEventListener('input', (e) => {
+            eraserSize = parseInt(e.target.value);
+            document.getElementById('eraserLabel').textContent = eraserSize + 'px';
+        });
 
         const colorBtns = document.querySelectorAll('.color-btn');
         const hexInput = document.getElementById('hexInput');
@@ -715,8 +828,7 @@
             brushColor = color;
             document.querySelector('.color-btn.active')?.classList.remove('active');
             if(currentTool === 'eraser' || currentTool === 'hand' || currentTool === 'select') {
-                 document.getElementById('tool-pen').click();
-                 sliderTooltip.style.display = 'none';
+                 masterPenBtn.click(); 
             }
         }
 
@@ -735,30 +847,14 @@
                 const newColor = '#' + val;
                 updateColor(newColor);
                 colorBtns.forEach(btn => {
-                    if(btn.dataset.color.toLowerCase() === newColor.toLowerCase()) {
-                        btn.classList.add('active');
-                    }
+                    if(btn.dataset.color.toLowerCase() === newColor.toLowerCase()) btn.classList.add('active');
                 });
-            }
-        });
-
-        document.getElementById('fullscreenBtn').addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error("Fullscreen error:", err.message);
-                });
-            } else {
-                document.exitFullscreen();
             }
         });
 
         const container = document.getElementById('toolbarContainer');
-        document.getElementById('squeezeBtn').addEventListener('click', () => {
-            container.classList.add('squeezed');
-        });
-        document.getElementById('expandBtn').addEventListener('click', () => {
-            container.classList.remove('squeezed');
-        });
+        document.getElementById('squeezeBtn').addEventListener('click', () => container.classList.add('squeezed'));
+        document.getElementById('expandBtn').addEventListener('click', () => container.classList.remove('squeezed'));
     </script>
 </body>
 </html>
