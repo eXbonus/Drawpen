@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Infinite Pro Drawing App</title>
-      <link rel="manifest" href="manifest.json">
     
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
-    
     <link rel="apple-touch-icon" href="icon-192.png">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -36,6 +36,7 @@
             color: var(--text-color);
             font-family: sans-serif;
             overscroll-behavior-y: contain; 
+            touch-action: none; /* Prevents mobile pull-to-refresh blank screens */
         }
 
         #canvasWrapper {
@@ -52,6 +53,47 @@
             display: block;
             width: 100%;
             height: 100%;
+        }
+
+        /* Top Action Bar (Undo, Redo) */
+        .top-actions {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: transparent;
+            border: none;
+            padding: 0;
+            z-index: 100;
+            box-shadow: none;
+            touch-action: none;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Smaller, circular floating buttons */
+        .top-actions button {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .top-actions button:active {
+            color: var(--active-color);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .toolbar-container {
@@ -84,7 +126,7 @@
 
         .sub-toolbar {
             display: none; 
-            padding: 8px 15px;
+            padding: 10px 15px;
             animation: slideUp 0.2s ease;
         }
 
@@ -129,7 +171,7 @@
             flex-wrap: wrap; 
         }
 
-        button {
+        button.tool-btn {
             background: transparent;
             border: none;
             color: var(--text-color);
@@ -145,7 +187,7 @@
             flex-shrink: 0;
         }
 
-        button:active, button.active {
+        button.tool-btn:active, button.tool-btn.active {
             color: var(--active-color);
             background: rgba(255, 255, 255, 0.1);
         }
@@ -202,6 +244,11 @@
         <canvas id="drawingCanvas"></canvas>
     </div>
 
+    <div class="top-actions" id="topActionsBar">
+        <button id="undoBtn" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
+        <button id="redoBtn" title="Redo"><i class="fa-solid fa-rotate-right"></i></button>
+    </div>
+
     <div class="toolbar-container" id="toolbarContainer">
         
         <div class="toolbar sub-toolbar" id="eraserSliderMenu">
@@ -213,11 +260,11 @@
 
         <div class="toolbar sub-toolbar" id="penSubMenu">
             <div class="row">
-                <button id="tool-ball" class="active" title="Ball Pen (Solid)"><i class="fa-solid fa-pen"></i></button>
-                <button id="tool-ink" title="Ink Pen (Smooth)"><i class="fa-solid fa-pen-nib"></i></button>
-                <button id="tool-pencil" title="Pencil (Soft)"><i class="fa-solid fa-pencil"></i></button>
-                <button id="tool-brush" title="Paint Brush (Thick)"><i class="fa-solid fa-paintbrush"></i></button>
-                <button id="tool-highlighter" title="Highlighter"><i class="fa-solid fa-marker"></i></button>
+                <button class="tool-btn active" id="tool-ball" title="Ball Pen (Solid)"><i class="fa-solid fa-pen"></i></button>
+                <button class="tool-btn" id="tool-ink" title="Ink Pen (Smooth)"><i class="fa-solid fa-pen-nib"></i></button>
+                <button class="tool-btn" id="tool-pencil" title="Pencil (Soft)"><i class="fa-solid fa-pencil"></i></button>
+                <button class="tool-btn" id="tool-brush" title="Paint Brush (Thick)"><i class="fa-solid fa-paintbrush"></i></button>
+                <button class="tool-btn" id="tool-highlighter" title="Highlighter"><i class="fa-solid fa-marker"></i></button>
                 <div class="divider"></div>
                 <span id="penLabel" style="min-width: 35px; font-size: 14px;">5px</span>
                 <input type="range" id="penSlider" min="1" max="100" value="5">
@@ -242,28 +289,26 @@
             </div>
 
             <div class="row">
-                <button id="tool-select" title="Select Tool"><i class="fa-solid fa-arrow-pointer"></i></button>
-                <button id="tool-hand" title="Pan Canvas"><i class="fa-regular fa-hand"></i></button>
+                <button class="tool-btn" id="tool-select" title="Select Tool"><i class="fa-solid fa-arrow-pointer"></i></button>
+                <button class="tool-btn" id="tool-hand" title="Pan Canvas"><i class="fa-regular fa-hand"></i></button>
                 <div class="divider"></div>
                 
-                <button id="tool-master-pen" class="active" title="Pen Options"><i class="fa-solid fa-pen"></i></button>
-                <button id="tool-eraser" title="Eraser"><i class="fa-solid fa-eraser"></i></button>
-                <button id="tool-rect" title="Square"><i class="fa-regular fa-square"></i></button>
-                <button id="tool-circle" title="Circle"><i class="fa-regular fa-circle"></i></button>
-                <button id="tool-line" title="Line"><i class="fa-solid fa-minus"></i></button>
+                <button class="tool-btn active" id="tool-master-pen" title="Pen Options"><i class="fa-solid fa-pen"></i></button>
+                <button class="tool-btn" id="tool-eraser" title="Eraser"><i class="fa-solid fa-eraser"></i></button>
+                <button class="tool-btn" id="tool-rect" title="Square"><i class="fa-regular fa-square"></i></button>
+                <button class="tool-btn" id="tool-circle" title="Circle"><i class="fa-regular fa-circle"></i></button>
+                <button class="tool-btn" id="tool-line" title="Line"><i class="fa-solid fa-minus"></i></button>
                 
                 <div class="divider"></div>
-                <button id="fullscreenBtn" title="Full Screen"><i class="fa-solid fa-expand"></i></button>
-                <button id="gridBtn" title="Toggle Grid"><i class="fa-solid fa-border-none"></i></button>
-                <button id="recenterBtn" title="Fit to Screen"><i class="fa-solid fa-crosshairs"></i></button>
-                <button id="zoomLockBtn" title="Lock Zoom"><i class="fa-solid fa-lock-open"></i></button>
-                <div class="divider"></div>
+                <button class="tool-btn" id="fullscreenBtn" title="Full Screen"><i class="fa-solid fa-expand"></i></button>
+                <button class="tool-btn" id="gridBtn" title="Toggle Grid"><i class="fa-solid fa-border-none"></i></button>
+                <button class="tool-btn" id="recenterBtn" title="Fit to Screen"><i class="fa-solid fa-crosshairs"></i></button>
+                <button class="tool-btn" id="zoomLockBtn" title="Lock Zoom"><i class="fa-solid fa-lock-open"></i></button>
                 
-                <button id="undoBtn" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
-                <button id="redoBtn" title="Redo"><i class="fa-solid fa-rotate-right"></i></button>
-                <button id="clearBtn" title="Clear Canvas" style="color: #ff3b30;"><i class="fa-solid fa-trash-can"></i></button>
                 <div class="divider"></div>
-                <button id="squeezeBtn" title="Squeeze Menu"><i class="fa-solid fa-compress"></i></button>
+                <button class="tool-btn" id="clearBtn" title="Clear Canvas" style="color: #ff3b30;"><i class="fa-solid fa-trash-can"></i></button>
+                <div class="divider"></div>
+                <button class="tool-btn" id="squeezeBtn" title="Squeeze Menu"><i class="fa-solid fa-compress"></i></button>
             </div>
         </div>
     </div>
@@ -318,8 +363,8 @@
 
         function initCanvas() {
             const ratio = window.devicePixelRatio || 1;
-            canvas.width = window.innerWidth * ratio;
-            canvas.height = window.innerHeight * ratio;
+            canvas.width = Math.max(window.innerWidth * ratio, 1);
+            canvas.height = Math.max(window.innerHeight * ratio, 1);
             canvas.style.width = window.innerWidth + 'px';
             canvas.style.height = window.innerHeight + 'px';
             redraw();
@@ -383,7 +428,6 @@
             }
         }
 
-        // --- 100% SMOOTH RENDERING ENGINE ---
         function renderFreehand(stroke) {
             const pts = stroke.points;
             if (pts.length === 0) return;
@@ -408,7 +452,6 @@
             ctx.lineWidth = Math.max(0.5, baseSize);
             ctx.strokeStyle = stroke.tool === 'eraser' ? '#000000' : stroke.color;
 
-            // BUG FIX: Single Tap Dot
             if (pts.length === 1) {
                 ctx.beginPath();
                 ctx.fillStyle = ctx.strokeStyle;
@@ -418,7 +461,6 @@
                 return;
             }
 
-            // BUG FIX: Continuous Unified Path (No Caterpillar/Dots)
             ctx.beginPath();
             ctx.moveTo(pts[0].x, pts[0].y);
             
@@ -430,8 +472,7 @@
             
             ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y); 
             ctx.stroke();
-
-            ctx.globalAlpha = 1.0; // Reset
+            ctx.globalAlpha = 1.0; 
         }
 
         function redraw() {
@@ -502,7 +543,8 @@
         }
 
         function startAction(e) {
-            if (e.target.closest('.toolbar-container')) return; 
+            // Ignore toolbar clicks
+            if (e.target.closest('.toolbar-container') || e.target.closest('.top-actions')) return; 
             pointers.set(e.pointerId, e);
 
             if (pointers.size === 2) {
@@ -561,7 +603,7 @@
                 };
                 
                 resetSnapTimer();
-                redraw(); // This will immediately draw the single tap dot
+                redraw(); 
             }
         }
 
@@ -706,6 +748,67 @@
         window.addEventListener('pointerup', endAction);
         window.addEventListener('pointercancel', endAction);
 
+        // --- DRAGGABLE UNDO/REDO BAR ---
+        const topActionsBar = document.getElementById('topActionsBar');
+        let dragTimer = null;
+        let isDraggingBar = false;
+        let wasDragged = false;
+        let barOffsetX = 0;
+        let barOffsetY = 0;
+
+        topActionsBar.addEventListener('pointerdown', (e) => {
+            e.stopPropagation(); 
+            const rect = topActionsBar.getBoundingClientRect();
+            barOffsetX = e.clientX - rect.left;
+            barOffsetY = e.clientY - rect.top;
+            wasDragged = false;
+
+            // 300ms hold to activate dragging
+            dragTimer = setTimeout(() => {
+                isDraggingBar = true;
+                wasDragged = true;
+                topActionsBar.style.opacity = '0.5';
+                topActionsBar.setPointerCapture(e.pointerId);
+            }, 300); 
+        });
+
+        topActionsBar.addEventListener('pointermove', (e) => {
+            if (!isDraggingBar) return;
+            e.preventDefault();
+
+            let newX = e.clientX - barOffsetX;
+            let newY = e.clientY - barOffsetY;
+            
+            newX = Math.max(0, Math.min(newX, window.innerWidth - topActionsBar.offsetWidth));
+            newY = Math.max(0, Math.min(newY, window.innerHeight - topActionsBar.offsetHeight));
+
+            topActionsBar.style.left = newX + 'px';
+            topActionsBar.style.top = newY + 'px';
+            topActionsBar.style.right = 'auto'; 
+        });
+
+        const stopDragging = (e) => {
+            clearTimeout(dragTimer);
+            if (isDraggingBar) {
+                isDraggingBar = false;
+                topActionsBar.style.opacity = '1';
+                try { topActionsBar.releasePointerCapture(e.pointerId); } catch(err){}
+            }
+        };
+
+        topActionsBar.addEventListener('pointerup', stopDragging);
+        topActionsBar.addEventListener('pointercancel', stopDragging);
+
+        // Prevent button click if we just finished dragging the bar
+        topActionsBar.addEventListener('click', (e) => {
+            if (wasDragged) {
+                e.stopPropagation();
+                e.preventDefault();
+                wasDragged = false;
+            }
+        }, true);
+
+
         // --- UTILITIES ---
         document.getElementById('undoBtn').addEventListener('click', () => {
             if (strokes.length > 0) { redoStack.push(strokes.pop()); selectedIndex = -1; redraw(); saveToLocal(); }
@@ -776,11 +879,12 @@
             if (['ball', 'ink', 'pencil', 'brush', 'highlighter'].includes(currentTool)) {
                 penSubMenu.style.display = penSubMenu.style.display === 'flex' ? 'none' : 'flex';
             } else {
-                document.querySelectorAll('#mainToolbar button.active').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#mainToolbar button.tool-btn.active').forEach(b => b.classList.remove('active'));
                 masterPenBtn.classList.add('active');
                 
-                const activeSubPen = document.querySelector('#penSubMenu button.active');
-                currentTool = activeSubPen.id.replace('tool-', '');
+                const activeSubPen = document.querySelector('#penSubMenu button.tool-btn.active');
+                if (activeSubPen) currentTool = activeSubPen.id.replace('tool-', '');
+                else currentTool = 'ball'; 
                 
                 penSubMenu.style.display = 'flex';
                 selectedIndex = -1; 
@@ -788,20 +892,20 @@
             }
         });
 
-        const otherTools = document.querySelectorAll('.toolbar button[id^="tool-"]:not(#tool-master-pen)');
+        const otherTools = document.querySelectorAll('.toolbar button.tool-btn[id^="tool-"]:not(#tool-master-pen)');
         otherTools.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const clickedTool = e.currentTarget.id.replace('tool-', '');
                 
                 if (['ball', 'ink', 'pencil', 'brush', 'highlighter'].includes(clickedTool)) {
-                    document.querySelectorAll('#penSubMenu button.active').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('#penSubMenu button.tool-btn.active').forEach(b => b.classList.remove('active'));
                     e.currentTarget.classList.add('active');
                     currentTool = clickedTool;
                     return; 
                 }
 
                 penSubMenu.style.display = 'none';
-                document.querySelectorAll('#mainToolbar button.active').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#mainToolbar button.tool-btn.active').forEach(b => b.classList.remove('active'));
                 
                 if (clickedTool === 'eraser') {
                     e.currentTarget.classList.add('active');
